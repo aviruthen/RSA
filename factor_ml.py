@@ -92,6 +92,7 @@ def approx_m2(validate_num, primes, num_bits):
   for pq=n (features are bits of n rather than n itself)"""
   # primes = gen_primes()
   X = []
+  x_vals = []
   y = []
   for _ in range(10000):
     p = primes[r.randint(0,len(primes)-1)]
@@ -99,7 +100,7 @@ def approx_m2(validate_num, primes, num_bits):
     while (p == q):
       q = primes[r.randint(0,len(primes)-1)]
   
-    if not p*q in X:
+    if not p*q in x_vals:
       val = [0]*num_bits
       bin_num = bin(p*q)[2:]
       try:
@@ -113,17 +114,21 @@ def approx_m2(validate_num, primes, num_bits):
         print(p,q)
         print(bin_num)
         exit()
+    
+      x_vals.append(p * q)
 
   xTe = []
+  xTe_vals = []
   yTe = []
   nums = []
-  for _ in range(validate_num):
+  num_added = 0
+  while num_added < validate_num:
     p = primes[r.randint(0,len(primes)-1)]
     q = primes[r.randint(0,len(primes)-1)]
     while (p == q):
       q = primes[r.randint(0,len(primes)-1)]
 
-    if not p*q in xTe:
+    if not p*q in xTe_vals and not p*q in x_vals:
       val = [0]*num_bits
       bin_num = bin(p*q)[2:]
       for i in range(len(bin_num)):
@@ -131,10 +136,14 @@ def approx_m2(validate_num, primes, num_bits):
       xTe.append(val)
       yTe.append(abs(p - q))
       nums.append(p*q)
+    
+      xTe_vals.append(p*q)
+      num_added += 1
 
   X = np.array(X)
   y = np.array(y).reshape(-1,1)
 
+  
   # print(X)
   # print(y)
   # print(xTe)
@@ -192,7 +201,6 @@ def approx_m2(validate_num, primes, num_bits):
 
   #print(yp_asort)
   #print(yTe_asort)
-
 
   def cmp_asort_similarity(lst1, lst2):
     d = 0
@@ -258,6 +266,7 @@ def approx_m2(validate_num, primes, num_bits):
   print('Average random argsort similarity: ' + str((avg_dist / validate_num) / 200))
   print(('Largest argsort distance with validation set of size %d: ' + str(largest_dist)) % validate_num)
   print('Accuracy: ' + str(acc / total))
+  print('True Accuracy: ' + str(sum(y_preds == yTe) / len(yTe)))
   # print(accs)
 
   return model
